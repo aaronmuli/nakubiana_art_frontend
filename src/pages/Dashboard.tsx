@@ -47,48 +47,8 @@ type ArtistProfile = {
   about: string;
 };
 
-// const initialPaintings: Painting[] = [
-//   {
-//     id: 1,
-//     title: "Silent Blue",
-//     year: "2026",
-//     medium: "Oil on canvas",
-//     dimensions: "120 × 90 cm",
-//     category: "Abstract",
-//     description: "An exploration of silence, space and colour.",
-//     image:
-//       "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800",
-//     // published: true,
-//   },
-//   {
-//     id: 2,
-//     title: "Untitled II",
-//     year: "2025",
-//     medium: "Acrylic on canvas",
-//     dimensions: "100 × 80 cm",
-//     category: "Abstract",
-//     description: "A study of movement and emotional space.",
-//     image:
-//       "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800",
-//     // published: true,
-//   },
-//   {
-//     id: 3,
-//     title: "Morning",
-//     year: "2026",
-//     medium: "Oil on canvas",
-//     dimensions: "90 × 70 cm",
-//     category: "Landscape",
-//     description: "Light emerging through the quiet of morning.",
-//     image:
-//       "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=800",
-//     // published: true,
-//   },
-// ];
-
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(false);
-  const [miniLoading, setMiniLoading] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState(getTimeOfDay());
 
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -125,8 +85,7 @@ const Dashboard = () => {
     dimensions: "",
     category: "",
     description: "",
-    image: "",
-    // published: true,
+    image: ""
   });
 
   const resetPaintingForm = () => {
@@ -137,8 +96,7 @@ const Dashboard = () => {
       dimensions: "",
       category: "",
       description: "",
-      image: "",
-      // published: true,
+      image: ""
     });
 
     setEditingPainting(null);
@@ -827,6 +785,7 @@ const Dashboard = () => {
 
                   {/* Hidden interactive input layer that naturally handles click and drag-and-drop */}
                   <input
+                    required
                     type="file"
                     accept="image/*"
                     onChange={(e) => {
@@ -848,7 +807,6 @@ const Dashboard = () => {
               <div className="grid gap-6 md:grid-cols-2">
                 <FormField label="Title">
                   <input
-                    required
                     value={paintingForm.title}
                     onChange={(e) =>
                       setPaintingForm({
@@ -862,7 +820,6 @@ const Dashboard = () => {
 
                 <FormField label="Year">
                   <input
-                    required
                     value={paintingForm.year}
                     onChange={(e) =>
                       setPaintingForm({
@@ -876,7 +833,6 @@ const Dashboard = () => {
 
                 <FormField label="Medium">
                   <input
-                    required
                     placeholder="Oil on canvas"
                     value={paintingForm.medium}
                     onChange={(e) =>
