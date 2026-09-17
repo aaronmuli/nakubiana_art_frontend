@@ -1,6 +1,6 @@
 import { Painting } from "@/models/painting";
 
-const url = `${import.meta.env.VITE_HOST}`
+const url = `${import.meta.env.VITE_HOST}/paintings`
 
 async function addPainting(painting: Painting) {
     try {
@@ -83,7 +83,7 @@ async function updatePainting(painting: Painting, id: string) {
 
 async function getPaintings() {
     try {
-        const response = await fetch(`${url}/paintings`, {
+        const response = await fetch(`${url}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",
