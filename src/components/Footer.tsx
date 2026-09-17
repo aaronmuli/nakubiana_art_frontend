@@ -21,7 +21,7 @@ const Footer = () => (
       <div className="md:col-span-2 md:col-start-11">
         <p className="text-label mb-6">Connect</p>
         <div className="space-y-3 text-xs font-body">
-          <a href="https://instagram.com" target="_blank" rel="noreferrer" className="block gallery-link w-fit">
+          <a href="https://instagram.com/nakubiana_art" target="_blank" rel="noreferrer" className="block gallery-link w-fit">
             Instagram
           </a>
           <a href="https://www.facebook.com/samueln.nakubiana" target="_blank" rel="noreferrer" className="block gallery-link w-fit">
