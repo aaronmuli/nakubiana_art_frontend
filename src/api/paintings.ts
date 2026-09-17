@@ -1,6 +1,6 @@
 import { Painting } from "@/models/painting";
 
-const url = `http://${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}`
+const url = `${import.meta.env.VITE_HOST}`
 
 async function addPainting(painting: Painting) {
     try {

@@ -1,6 +1,6 @@
 import { ProfileModel, ContactModel } from "../models/user";
 
-const url = `http://${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}`
+const url = `${import.meta.env.VITE_HOST}`
 
 async function loginUser(email: string, password: string) {
    try{
