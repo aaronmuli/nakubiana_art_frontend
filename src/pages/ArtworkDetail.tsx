@@ -87,7 +87,7 @@ const ArtworkDetail = () => {
               </div>
               <div className="flex justify-between py-3 border-b border-border/60">
                 <span className="text-muted-foreground uppercase tracking-widest">Size</span>
-                <span>{artwork.size}</span>
+                <span>{artwork.dimensions}</span>
               </div>
             </div>
           </motion.div>
