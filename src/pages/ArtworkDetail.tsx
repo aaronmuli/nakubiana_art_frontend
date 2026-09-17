@@ -74,21 +74,31 @@ const ArtworkDetail = () => {
 
             <p className="text-label mt-2">{artwork.year}</p>
 
-            <div className="h-[1px] w-10 bg-border mt-8 mb-8" />
+            {
+              (artwork.year || artwork.title || artwork.description) && (
+                <div className="h-[1px] w-10 bg-border mt-8 mb-8" />
+              )
+            }
 
             <p className="text-sm leading-[1.8] text-foreground/70 font-body">
               {artwork.description}
             </p>
 
             <div className="mt-10 space-y-4 text-xs font-body">
-              <div className="flex justify-between py-3 border-b border-border/60">
-                <span className="text-muted-foreground uppercase tracking-widest">Medium</span>
-                <span className="text-right">{artwork.medium}</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-border/60">
-                <span className="text-muted-foreground uppercase tracking-widest">Size</span>
-                <span>{artwork.dimensions}</span>
-              </div>
+              { artwork.medium && (
+                <div className="flex justify-between py-3 border-b border-border/60">
+                  <span className="text-muted-foreground uppercase tracking-widest">Medium</span>
+                  <span className="text-right">{artwork.medium}</span>
+                </div>) 
+              }
+              {
+                artwork.dimensions && (
+                <div className="flex justify-between py-3 border-b border-border/60">
+                  <span className="text-muted-foreground uppercase tracking-widest">Size</span>
+                  <span>{artwork.dimensions}</span>
+                </div>
+                )
+              }
             </div>
           </motion.div>
         </div>
