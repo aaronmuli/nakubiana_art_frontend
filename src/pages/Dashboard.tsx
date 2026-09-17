@@ -785,7 +785,7 @@ const Dashboard = () => {
 
                   {/* Hidden interactive input layer that naturally handles click and drag-and-drop */}
                   <input
-                    required
+                    required={!editingPainting}
                     type="file"
                     accept="image/*"
                     onChange={(e) => {
