@@ -94,7 +94,7 @@ const ArtworkDetail = () => {
               {
                 artwork.dimensions && (
                 <div className="flex justify-between py-3 border-b border-border/60">
-                  <span className="text-muted-foreground uppercase tracking-widest">Size</span>
+                  <span className="text-muted-foreground uppercase tracking-widest">Size(cm)</span>
                   <span>{artwork.dimensions}</span>
                 </div>
                 )
