@@ -76,7 +76,7 @@ async function UpdateContact(contact: ContactModel) {
 
 async function ProfileData() {
     try {
-        const response = await fetch(`${url}/profile`, {
+        const response = await fetch(url, {
             method: "GET",
             headers: {
                 'Accept': 'application/json',
