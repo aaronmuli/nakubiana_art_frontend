@@ -3,11 +3,17 @@ import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-artwork.jpg";
 import lock from "@/assets/lock.svg";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { getPaintings } from "@/api/paintings";
 import { ProfileData } from "@/api/user";
+import { home } from "@/api/analytics";
 
 const Index = () => {
+
+  async function triggerHome(){
+    await home();
+  }
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["paintings"],
@@ -20,6 +26,10 @@ const Index = () => {
     staleTime: 24 * 60 * 60 * 1000,
     queryFn: ProfileData,
   });
+
+  useEffect(() => {
+    triggerHome();
+  },[]);
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-foreground">

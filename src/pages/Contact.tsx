@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Orbit } from 'ldrs/react'
 import 'ldrs/react/Orbit.css'
+import { contact } from "@/api/analytics";
 
 import { ProfileData } from "@/api/user";
 
@@ -62,12 +63,18 @@ const Contact = () => {
     setForm({ name: "", email: "", message: "" });
   };
 
+  async function triggerContact() {
+    await contact();
+  }
+
   const inputClasses = (field: string) =>
     `w-full bg-transparent border-b py-4 text-foreground text-sm font-body focus:outline-none transition-colors duration-500 ${
       focused === field ? "border-foreground" : "border-border/60"
     }`;
 
    useEffect(() => {
+    triggerContact();
+    
     if(data) {
       setProfileData(data);
       setLoading(false);

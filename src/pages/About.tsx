@@ -8,6 +8,7 @@ import 'ldrs/react/Orbit.css'
 
 import { ProfileData } from "@/api/user";
 import { toast } from "sonner";
+import { about } from "@/api/analytics";
 
 const About = () => {
 
@@ -55,7 +56,13 @@ const About = () => {
     toast.error(message);
   }
 
+  async function triggerAbout() {
+    await about();
+  }
+
   useEffect(() => {
+    triggerAbout();
+    
     if(data) {
       setProfileData(data);
       setLoading(false);

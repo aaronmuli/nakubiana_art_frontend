@@ -9,6 +9,7 @@ import 'ldrs/react/Orbit.css'
 import { getPaintings } from "@/api/paintings";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { gallery } from "@/api/analytics";
 
 const Gallery = () => {
 
@@ -38,7 +39,13 @@ const Gallery = () => {
     toast.error(message);
   }
 
+  async function triggerGallery() {
+    await gallery();
+  }
+
   useEffect(() => {
+    triggerGallery();
+    
     if(data) {
       setPaintings(data);
       setLoading(false);

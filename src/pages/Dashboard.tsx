@@ -18,14 +18,16 @@ import {
   Menu,
   Save,
   ImagePlus,
+  ChartLine
 } from "lucide-react";
 import { toast } from "sonner";
-import { 
-  addPainting, 
-  getPaintings, 
+import {
+  addPainting,
+  getPaintings,
   trashPainting,
   updatePainting
-} from "../api/paintings";
+} from "@/api/paintings";
+import { getAnalytics } from "@/api/analytics";
 
 
 type Painting = {
@@ -47,12 +49,20 @@ type ArtistProfile = {
   about: string;
 };
 
+
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState(getTimeOfDay());
-
+  
   const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  const [analytics, setAnalytics] = useState([]);
+  const [totalVisits, setTotalVisits] = useState(0);
+  const [homeVisits, setHomeVisits] = useState(0);
+  const [galleryVisits, setGalleryVisits] = useState(0);
+  const [aboutVisits, setAboutVisits] = useState(0);
+  const [contactVisits, setContactVisits] = useState(0);
 
   const [paintings, setPaintings] = useState<Painting[]>([]);
   const [paintingFile, setPaintingFile] = useState<File | null>(null);
@@ -85,7 +95,8 @@ const Dashboard = () => {
     dimensions: "",
     category: "",
     description: "",
-    image: ""
+    image: "",
+    // published: true,
   });
 
   const resetPaintingForm = () => {
@@ -96,7 +107,8 @@ const Dashboard = () => {
       dimensions: "",
       category: "",
       description: "",
-      image: ""
+      image: "",
+      // published: true,
     });
 
     setEditingPainting(null);
@@ -113,7 +125,7 @@ const Dashboard = () => {
   const showSuccessToast = (message: string) => {
     toast.success(message);
   }
-  
+
   const showErrorToast = (message: string) => {
     toast.error(message);
   }
@@ -131,9 +143,35 @@ const Dashboard = () => {
     }
   }
 
+async function getStats() {
+  const data = await getAnalytics();
+
+  setAnalytics(data);
+
+  const stats = data.reduce(
+    (totals, analytic) => ({
+      home: totals.home + analytic.home_visits,
+      gallery: totals.gallery + analytic.gallery_visits,
+      about: totals.about + analytic.about_visits,
+      contact: totals.contact + analytic.contact_visits,
+    }),
+    {
+      home: 0,
+      gallery: 0,
+      about: 0,
+      contact: 0,
+    }
+  );
+
+  setTotalVisits(data.length);
+  setHomeVisits(stats.home);
+  setGalleryVisits(stats.gallery);
+  setAboutVisits(stats.about);
+  setContactVisits(stats.contact);
+}
 
   // Paintings Functions 
-  async function handlePaintingSubmit (e: React.FormEvent) {
+  async function handlePaintingSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
@@ -142,13 +180,13 @@ const Dashboard = () => {
         current.map((painting) =>
           painting.id === editingPainting.id
             ? {
-                ...painting,
-                ...paintingForm,
-              }
+              ...painting,
+              ...paintingForm,
+            }
             : painting
         )
       );
-      
+
       let updatedPaintingData: Painting;
 
       if (paintingFile !== null) {
@@ -183,7 +221,7 @@ const Dashboard = () => {
       const upload = await addPainting(finalPainting);
 
       setPaintings((current) => [newPainting, ...current]);
-      
+
       if (upload) {
         setLoading(false);
         showSuccessToast("Painting added successfully!");
@@ -245,7 +283,7 @@ const Dashboard = () => {
     localStorage.removeItem("authenticated");
     window.location.href = "/auth";
   }
-  
+
   async function saveContact(e: React.FormEvent) {
     try {
       e.preventDefault();
@@ -321,15 +359,20 @@ const Dashboard = () => {
       label: "Contact",
       icon: Mail,
     },
+    {
+      id: "analytics",
+      label: "Analytics",
+      icon: ChartLine,
+    },
   ];
-
 
   useEffect(() => {
     const timeofDay = getTimeOfDay();
     setTimeOfDay(timeofDay);
-    
+    getStats()
+
     const user = JSON.parse(localStorage.getItem("user"));
-    
+
     setProfile({
       id: user?.profile.id,
       photo: user?.profile.photo,
@@ -346,7 +389,7 @@ const Dashboard = () => {
       facebook: user?.facebook,
     });
 
-    if(data) {
+    if (data) {
       setPaintings(data as Painting[]);
     }
   }, [data]);
@@ -355,16 +398,16 @@ const Dashboard = () => {
     <div className="min-h-screen bg-[#f7f6f3] text-[#181818]">
       {
         isLoading && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
-                <Orbit
-                    size="35"
-                    speed="1.5"
-                    color="white" 
-                />
-            </div>
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+            <Orbit
+              size="35"
+              speed="1.5"
+              color="white"
+            />
+          </div>
         )
       }
-      
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -410,10 +453,9 @@ const Dashboard = () => {
                   className={`
                     flex w-full items-center gap-3 px-3 py-3 text-left
                     text-sm transition-all duration-300
-                    ${
-                      active
-                        ? "bg-black text-white"
-                        : "text-black/50 hover:bg-black/5 hover:text-black"
+                    ${active
+                      ? "bg-black text-white"
+                      : "text-black/50 hover:bg-black/5 hover:text-black"
                     }
                   `}
                 >
@@ -472,6 +514,7 @@ const Dashboard = () => {
               onNavigate={setActiveSection}
               profile={profile}
               timeOfDay={timeOfDay}
+              totalVisits={totalVisits}
             />
           )}
 
@@ -555,81 +598,81 @@ const Dashboard = () => {
                 title="Artist Profile"
                 description="Control how the artist is introduced on the website."
               />
-            <form onSubmit={saveProfile}>
-              <div className="mt-10 max-w-3xl">
-                <div className="space-y-8">
-                  <div className="group">
-                    <div className="relative flex aspect-[4/2] items-center justify-center overflow-hidden border border-dashed border-black/20 bg-white group hover:border-black/40 transition-colors">
-                      {profile.photo ? (
-                        <img
-                          src={profile.photo as string}
-                          alt="Profile photo preview"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="text-center text-black/30 pointer-events-none">
-                          <ImagePlus
-                            className="mx-auto mb-3 group-hover:scale-105 transition-transform"
-                            size={30}
-                            strokeWidth={1}
+              <form onSubmit={saveProfile}>
+                <div className="mt-10 max-w-3xl">
+                  <div className="space-y-8">
+                    <div className="group">
+                      <div className="relative flex aspect-[4/2] items-center justify-center overflow-hidden border border-dashed border-black/20 bg-white group hover:border-black/40 transition-colors">
+                        {profile.photo ? (
+                          <img
+                            src={profile.photo as string}
+                            alt="Profile photo preview"
+                            className="h-full w-full object-cover"
                           />
-                          <p className="text-xs">
-                            Choose or drag a profile photo to upload.
-                          </p>
-                        </div>
-                      )}
-                      {/* Hidden interactive input layer that naturally handles click and drag-and-drop */}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setProfilePhotoFile(file);
-                            setProfile({
-                              ...profile,
-                              photo: URL.createObjectURL(file),
-                            });
-                          }
-                        }}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                      />
+                        ) : (
+                          <div className="text-center text-black/30 pointer-events-none">
+                            <ImagePlus
+                              className="mx-auto mb-3 group-hover:scale-105 transition-transform"
+                              size={30}
+                              strokeWidth={1}
+                            />
+                            <p className="text-xs">
+                              Choose or drag a profile photo to upload.
+                            </p>
+                          </div>
+                        )}
+                        {/* Hidden interactive input layer that naturally handles click and drag-and-drop */}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setProfilePhotoFile(file);
+                              setProfile({
+                                ...profile,
+                                photo: URL.createObjectURL(file),
+                              });
+                            }
+                          }}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                      </div>
                     </div>
+
+                    <FormField label="Artist Name">
+                      <input
+                        value={profile.name}
+                        onChange={(e) =>
+                          setProfile({
+                            ...profile,
+                            name: e.target.value,
+                          })
+                        }
+                        className="input"
+                      />
+                    </FormField>
+
+                    <FormField label="About the Artist">
+                      <textarea
+                        rows={7}
+                        value={profile.about}
+                        onChange={(e) =>
+                          setProfile({
+                            ...profile,
+                            about: e.target.value,
+                          })
+                        }
+                        className="input resize-none"
+                      />
+                    </FormField>
+                    <button type="submit" className="flex items-center gap-2 bg-black px-6 py-3 text-xs uppercase tracking-[0.15em] text-white transition hover:bg-black/80">
+                      <Save size={15} />
+                      Save Changes
+                    </button>
                   </div>
-
-                  <FormField label="Artist Name">
-                    <input
-                      value={profile.name}
-                      onChange={(e) =>
-                        setProfile({
-                          ...profile,
-                          name: e.target.value,
-                        })
-                      }
-                      className="input"
-                    />
-                  </FormField>
-
-                  <FormField label="About the Artist">
-                    <textarea
-                      rows={7}
-                      value={profile.about}
-                      onChange={(e) =>
-                        setProfile({
-                          ...profile,
-                          about: e.target.value,
-                        })
-                      }
-                      className="input resize-none"
-                    />
-                  </FormField>
-                  <button type="submit" className="flex items-center gap-2 bg-black px-6 py-3 text-xs uppercase tracking-[0.15em] text-white transition hover:bg-black/80">
-                    <Save size={15} />
-                    Save Changes
-                  </button>
                 </div>
-              </div>
-            </form>
+              </form>
             </section>
           )}
 
@@ -730,6 +773,148 @@ const Dashboard = () => {
               </form>
             </section>
           )}
+
+          {/* ANALYTICS */}
+          {
+            activeSection === "analytics" && (
+              <section>
+                <SectionHeader
+                  eyebrow="Analytics"
+                  title="Visitor Activity"
+                  description="Track how visitors interact with your online gallery."
+                />
+
+                <div className="mt-10 grid gap-2 sm:grid-cols-2 lg:grid-cols-5"> 
+                  <StatCard label="Total Website Visits" value={totalVisits} /> 
+                  <StatCard label="Home Page Visits" value={homeVisits} /> 
+                  <StatCard label="Gallery Visits" value={galleryVisits} /> 
+                  <StatCard label="About Page Visits" value={aboutVisits} /> 
+                  <StatCard label="Contact Page Visits" value={contactVisits} /> 
+                </div>
+
+                <div className="mt-10 overflow-hidden border border-black/10 bg-white">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[900px] border-collapse text-left">
+                      <thead>
+                        <tr className="border-b border-black/10 bg-black/[0.02]">
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            Visitor
+                          </th>
+
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            Visits
+                          </th>
+
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            Home
+                          </th>
+
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            Gallery
+                          </th>
+
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            About
+                          </th>
+
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            Contact
+                          </th>
+
+                          <th className="px-5 py-4 text-[10px] font-medium uppercase tracking-[0.15em] text-black/40">
+                            First Seen
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {analytics.length > 0 ? (
+                          analytics.map((visitor) => (
+                            <tr
+                              key={visitor.id}
+                              className="border-b border-black/5 last:border-0 transition hover:bg-black/[0.02]"
+                            >
+                              <td className="px-5 py-5">
+                                <div>
+                                  <p className="font-mono text-xs text-black/70">
+                                    {visitor.visitor_id.slice(0, 12)}...
+                                  </p>
+
+                                  <p className="mt-1 text-[10px] text-black/30">
+                                    ID: {visitor.id.slice(0, 8)}...
+                                  </p>
+                                </div>
+                              </td>
+
+                              <td className="px-5 py-5">
+                                <span className="font-serif text-lg">
+                                  {visitor.visit_count}
+                                </span>
+                              </td>
+
+                              <td className="px-5 py-5 text-sm text-black/60">
+                                {visitor.home_visits}
+                              </td>
+
+                              <td className="px-5 py-5 text-sm text-black/60">
+                                {visitor.gallery_visits}
+                              </td>
+
+                              <td className="px-5 py-5 text-sm text-black/60">
+                                {visitor.about_visits}
+                              </td>
+
+                              <td className="px-5 py-5 text-sm text-black/60">
+                                {visitor.contact_visits}
+                              </td>
+
+                              <td className="px-5 py-5">
+                                <p className="text-xs text-black/50">
+                                  {new Date(visitor.createdAt).toLocaleDateString(
+                                    undefined,
+                                    {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    }
+                                  )}
+                                </p>
+
+                                <p className="mt-1 text-[10px] text-black/30">
+                                  {new Date(visitor.createdAt).toLocaleTimeString(
+                                    undefined,
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )}
+                                </p>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={7}
+                              className="px-5 py-16 text-center"
+                            >
+                              <p className="font-serif text-xl text-black/40">
+                                No visitor activity yet.
+                              </p>
+
+                              <p className="mt-2 text-xs text-black/30">
+                                Analytics will appear here once visitors interact with
+                                your gallery.
+                              </p>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+            )}
         </div>
       </main>
 
@@ -762,7 +947,7 @@ const Dashboard = () => {
             >
               <div>
                 <label className="label">Artwork Image</label>
-              
+
                 <div className="relative flex aspect-[4/2] items-center justify-center overflow-hidden border border-dashed border-black/20 bg-white group hover:border-black/40 transition-colors">
                   {paintingForm.image ? (
                     <img
@@ -785,7 +970,6 @@ const Dashboard = () => {
 
                   {/* Hidden interactive input layer that naturally handles click and drag-and-drop */}
                   <input
-                    required={!editingPainting}
                     type="file"
                     accept="image/*"
                     onChange={(e) => {
@@ -807,6 +991,7 @@ const Dashboard = () => {
               <div className="grid gap-6 md:grid-cols-2">
                 <FormField label="Title">
                   <input
+                    required
                     value={paintingForm.title}
                     onChange={(e) =>
                       setPaintingForm({
@@ -820,6 +1005,7 @@ const Dashboard = () => {
 
                 <FormField label="Year">
                   <input
+                    required
                     value={paintingForm.year}
                     onChange={(e) =>
                       setPaintingForm({
@@ -833,6 +1019,7 @@ const Dashboard = () => {
 
                 <FormField label="Medium">
                   <input
+                    required
                     placeholder="Oil on canvas"
                     value={paintingForm.medium}
                     onChange={(e) =>
@@ -931,11 +1118,13 @@ const DashboardHome = ({
   onNavigate,
   profile,
   timeOfDay,
+  totalVisits
 }: {
   paintings: Painting[];
   onNavigate: (section: string) => void;
   profile: ArtistProfile;
   timeOfDay: string;
+  totalVisits: number
 }) => {
   // const published = paintings.filter((painting) => painting.published);
 
@@ -947,7 +1136,7 @@ const DashboardHome = ({
         </p>
 
         <h1 className="mt-2 font-serif text-4xl md:text-5xl">
-          Good {timeOfDay}, { profile.name }.
+          Good {timeOfDay}, {profile.name}.
         </h1>
 
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-black/50">
@@ -957,7 +1146,7 @@ const DashboardHome = ({
       </div>
 
       {/* Stats */}
-      <div className="mt-12 grid gap-px border border-black/10 bg-black/10 md:grid-cols-2">
+      <div className="mt-12 grid gap-px border border-black/10 bg-black/10 md:grid-cols-3">
         <Stat
           label="Total Paintings"
           value={paintings.length.toString()}
@@ -968,10 +1157,10 @@ const DashboardHome = ({
           value="1"
         />
 
-        {/* <Stat
-          label="Drafts"
-          value={(paintings.length - published.length).toString()}
-        /> */}
+        <Stat
+          label="Total Visits"
+          value={totalVisits.toString()}
+        />
       </div>
 
       {/* Recent paintings */}
@@ -1087,5 +1276,19 @@ const Stat = ({
     </div>
   );
 };
+
+const StatCard = ({ 
+  label, 
+  value, 
+}: { 
+  label: string; 
+  value: number; 
+}) => { 
+    return (
+      <div className="border border-black/10 bg-white p-4 transition hover:border-black/20"> 
+        <p className="text-[10px] uppercase tracking-[0.15em] text-black/40"> {label} </p> 
+        <p className="mt-4 font-serif text-3xl text-black/80"> {value} </p> 
+      </div>); 
+    };
 
 export default Dashboard;
